@@ -1,11 +1,10 @@
 //import logo from './logo.svg';
-import React, {useRef} from 'react';
+import React, {useRef, useEffect} from 'react';
 import * as tf from "@tensorflow/tfjs";
 import * as handpose from "@tensorflow-models/handpose";
 import Webcam from "react-webcam";
 import './App.css';
 import { drawHand } from './utilitiesForHand';
-
 
 function App() {
   const webcamRef =useRef(null);
@@ -43,6 +42,14 @@ function App() {
   }
 
   runHandpose();
+
+  useEffect(() => {
+    const webgazer = window.webgazer;
+    webgazer.setGazeListener((data,clock)=>{
+      console.log(data,clock)
+    }).begin()
+  }, []);
+
 
   return (
     <div className="App">
