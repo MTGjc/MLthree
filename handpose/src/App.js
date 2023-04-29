@@ -9,14 +9,43 @@ import { drawHand } from './utilitiesForHand';
 import * as THREE from 'three';
 import { Canvas, useThree, useFrame } from "react-three-fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
+import url from "./assets/telepathy1.mp4";
+
 
 const Man = () =>{
   const { nodes} = useGLTF('fall.gltf');
-  console.log (nodes);
   return (
     <group rotation={[Math.PI / 8, Math.PI * 1.2, 0]}>
       <mesh geometry ={nodes.man.geometry}>
         <meshStandardMaterial color="white" />
+      </mesh>
+    </group>
+  );
+}
+
+const Screen = () =>{
+  const { nodes } = useGLTF('cube1.gltf');
+  const [video] = useState(() => {
+    const vid = document.createElement("video");
+    vid.src = url;
+    vid.crossOrigin = "Anonymous";
+    vid.loop = true;
+    vid.muted = true;
+    vid.play();
+    return vid;
+  });
+
+return (
+    <group rotation={[Math.PI / 8, Math.PI * 1.2, 0]}>
+      <mesh geometry={nodes.Cube.geometry}>
+        <meshStandardMaterial color="white" />
+      </mesh>
+      <mesh rotation={[0, 0, 0]} position={[0, 0, 1.1]}>
+        <planeGeometry args={[3.2, 1.9]} />
+        <meshStandardMaterial emissive={"white"} side={THREE.DoubleSide}>
+          <videoTexture attach="map" args={[video]} />
+          <videoTexture attach="emissiveMap" args={[video]} />
+        </meshStandardMaterial>
       </mesh>
     </group>
   );
@@ -137,6 +166,7 @@ function App() {
           <directionalLight intensity={0.5} />
           <Suspense fallback={null}>
             <Man />
+            <Screen />
           </Suspense>
           <Floor />
         </Canvas>
