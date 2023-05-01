@@ -6,10 +6,17 @@ import Webcam from "react-webcam";
 import './App.css';
 import { drawHand } from './utilitiesForHand';
 
-import * as THREE from 'three';
-import { Canvas, useThree, useFrame } from "react-three-fiber";
-import { OrbitControls, useGLTF } from "@react-three/drei";
+import * as THREE from "three";
+import { Canvas, useThree, useFrame, extend } from "react-three-fiber";
+import { OrbitControls, useGLTF, Effects } from "@react-three/drei";
 import url from "./assets/telepathy1.mp4";
+
+
+import { BloomPass } from "three/examples/jsm/postprocessing/BloomPass";
+import { GlitchPass } from "three/examples/jsm/postprocessing/GlitchPass";
+
+extend({BloomPass, GlitchPass});
+
 
 
 const Man = () =>{
@@ -35,7 +42,7 @@ const Screen = () =>{
     return vid;
   });
 
-return (
+  return (
     <group rotation={[Math.PI / 8, Math.PI * 1.2, 0]}>
       <mesh geometry={nodes.Cube.geometry}>
         <meshStandardMaterial color="white" />
@@ -72,9 +79,10 @@ function App() {
   const webcamRef =useRef(null);
   const canvasRef =useRef(null);
 
+
   const runHandpose = async () =>{
     const net = await handpose.load();
-    // console.log('handpose loaded');
+    console.log('handpose loaded');
 
     setInterval(()=>{detect(net)}, 100)
   }
@@ -96,19 +104,22 @@ function App() {
       canvasRef.current.height = videoHeight;
 
       const hand = await net.estimateHands(video);
-      // console.log(hand);
+      console.log(hand);
 
       const ctx = canvasRef.current.getContext("2d");
       drawHand(hand, ctx);
     }
+
   }
 
   runHandpose();
 
   useEffect(() => {
     const webgazer = window.webgazer;
+    window.saveDataAcrossSessions = true;
+
     webgazer.setGazeListener((data,clock)=>{
-      // console.log(data,clock)
+      console.log(data,clock)
     }).begin()
   }, []);
 
@@ -153,14 +164,12 @@ function App() {
           }}
         />
         <Canvas>
-            <group position={[0, 0, 0]}>
-            <OrbitControls
-              target={[0, 0, 0]}
-              maxPolarAngle={Math.PI / 2}
-              minPolarAngle={
-            0}
-            />
-            </group>
+            <Effects>
+              <bloomPass attachArray="passes" />
+              <glitchPass attachArray="passes"/>
+            </Effects>
+
+            <OrbitControls/>
           {/* <Camera camera={{ position: [cameraX, 0, 20], fov: 50 }}/> */}
           <fog attach="fog" args={["red", 1, 70]} />
           <directionalLight intensity={0.5} />
